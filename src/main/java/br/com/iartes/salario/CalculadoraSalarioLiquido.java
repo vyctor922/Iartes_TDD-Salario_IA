@@ -17,24 +17,42 @@ public class CalculadoraSalarioLiquido {
 
     public double calcular(double salarioBruto) {
         ValidadorEntrada.validarSalarioPositivo(salarioBruto);
+        
         double inss = calculadoraDescontos.calcularINSS(salarioBruto);
         double irrf = calculadoraDescontos.calcularIRRF(salarioBruto);
-        double liquido = salarioBruto - inss - irrf;
-        return Arredondador.duasCasas(liquido);
+        
+        return calcularLiquidoFinal(salarioBruto, inss, irrf, 0.0);
     }
 
     public double calcular(double salarioBruto, int numeroDependentes, boolean optanteValeTransporte) {
         ValidadorEntrada.validarSalarioPositivo(salarioBruto);
         ValidadorEntrada.validarDependentesNaoNegativos(numeroDependentes);
+
         double inss = calculadoraDescontos.calcularINSS(salarioBruto);
-        double irrf;
+        double irrf = obterDescontoIRRF(salarioBruto, numeroDependentes, optanteValeTransporte);
+        double vt = calcularValeTransporte(salarioBruto, optanteValeTransporte);
+
+        return calcularLiquidoFinal(salarioBruto, inss, irrf, vt);
+    }
+
+    private double obterDescontoIRRF(double salarioBruto, int numeroDependentes, boolean optanteValeTransporte) {
+        // Mantém a compatibilidade com a regra de negócio anterior onde
+        // sem dependentes e sem VT, usava-se o cálculo simplificado (V1)
         if (numeroDependentes == 0 && !optanteValeTransporte) {
-            irrf = calculadoraDescontos.calcularIRRF(salarioBruto);
-        } else {
-            irrf = calculadoraDescontos.calcularIRRF(salarioBruto, numeroDependentes);
+            return calculadoraDescontos.calcularIRRF(salarioBruto);
         }
-        double vt = optanteValeTransporte ? Arredondador.duasCasas(RegrasTributarias.ALIQUOTA_VALE_TRANSPORTE * salarioBruto) : 0.00;
-        double liquido = salarioBruto - inss - irrf - vt;
+        return calculadoraDescontos.calcularIRRF(salarioBruto, numeroDependentes);
+    }
+
+    private double calcularValeTransporte(double salarioBruto, boolean optante) {
+        if (!optante) {
+            return 0.00;
+        }
+        return Arredondador.duasCasas(RegrasTributarias.ALIQUOTA_VALE_TRANSPORTE * salarioBruto);
+    }
+
+    private double calcularLiquidoFinal(double bruto, double inss, double irrf, double vt) {
+        double liquido = bruto - inss - irrf - vt;
         return Arredondador.duasCasas(liquido);
     }
 }
