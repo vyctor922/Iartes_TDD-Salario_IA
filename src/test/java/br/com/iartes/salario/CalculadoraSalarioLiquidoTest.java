@@ -135,11 +135,25 @@ class CalculadoraSalarioLiquidoTest {
         void Deve_lancar_excecao_para_valores_invalidos() {
             try {
                 Object instance = clazz.getDeclaredConstructor().newInstance();
-                assertThrows(IllegalArgumentException.class,
-                        () -> metodoCalcular.invoke(instance, 0.00),
+                assertThrows(IllegalArgumentException.class, () -> {
+                            try {
+                                metodoCalcular.invoke(instance, 0.00);
+                            } catch (InvocationTargetException e) {
+                                Throwable cause = e.getCause();
+                                if (cause instanceof RuntimeException re) throw re;
+                                throw new RuntimeException(cause);
+                            }
+                        },
                         "Deve lançar IllegalArgumentException para salário igual a zero");
-                assertThrows(IllegalArgumentException.class,
-                        () -> metodoCalcular.invoke(instance, -1.00),
+                assertThrows(IllegalArgumentException.class, () -> {
+                            try {
+                                metodoCalcular.invoke(instance, -1.00);
+                            } catch (InvocationTargetException e) {
+                                Throwable cause = e.getCause();
+                                if (cause instanceof RuntimeException re) throw re;
+                                throw new RuntimeException(cause);
+                            }
+                        },
                         "Deve lançar IllegalArgumentException para salário negativo");
             } catch (ReflectiveOperationException e) {
                 fail("Falha de reflexão ao preparar instância: " + e.getMessage());
@@ -147,4 +161,3 @@ class CalculadoraSalarioLiquidoTest {
         }
     }
 }
-

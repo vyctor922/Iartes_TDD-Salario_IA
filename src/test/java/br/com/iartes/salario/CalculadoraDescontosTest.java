@@ -144,11 +144,25 @@ class CalculadoraDescontosTest {
             double salarioNegativo = -100.00;
             try {
                 Object instance = clazz.getDeclaredConstructor().newInstance();
-                assertThrows(IllegalArgumentException.class,
-                        () -> metodoINSS.invoke(instance, salarioNegativo),
+                assertThrows(IllegalArgumentException.class, () -> {
+                            try {
+                                metodoINSS.invoke(instance, salarioNegativo);
+                            } catch (InvocationTargetException e) {
+                                Throwable cause = e.getCause();
+                                if (cause instanceof RuntimeException re) throw re;
+                                throw new RuntimeException(cause);
+                            }
+                        },
                         "Deve lançar IllegalArgumentException para INSS com salário negativo");
-                assertThrows(IllegalArgumentException.class,
-                        () -> metodoIRRF.invoke(instance, salarioNegativo),
+                assertThrows(IllegalArgumentException.class, () -> {
+                            try {
+                                metodoIRRF.invoke(instance, salarioNegativo);
+                            } catch (InvocationTargetException e) {
+                                Throwable cause = e.getCause();
+                                if (cause instanceof RuntimeException re) throw re;
+                                throw new RuntimeException(cause);
+                            }
+                        },
                         "Deve lançar IllegalArgumentException para IRRF com salário negativo");
             } catch (ReflectiveOperationException e) {
                 fail("Falha de reflexão ao preparar instância: " + e.getMessage());
@@ -156,4 +170,3 @@ class CalculadoraDescontosTest {
         }
     }
 }
-
