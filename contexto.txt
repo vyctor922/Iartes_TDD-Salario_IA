@@ -1,0 +1,24 @@
+Aplicar o ciclo de Desenvolvimento Orientado a Testes (TDD) com apoio de ferramentas de Inteligência Artificial, analisando criticamente seus impactos sobre a qualidade do software, design do código e métricas de software, no contexto da engenharia de software moderna.  
+
+
+Domínio Obrigatório
+
+Regras de Negócio
+
+O sistema recebe como entrada:  Salário bruto (valor numérico positivo).
+
+Descontos obrigatórios:
+
+    INSS - 8% sobre o salário bruto, limitado a um teto máximo de desconto de R$ 500,00.
+    IRRF - Isento para salários brutos até R$ 2.000,00 e taxado em 10% sobre o valor total do salário bruto para salários acima de R$ 2.000,00.
+
+
+O salário líquido é calculado como: salário líquido = salário bruto − desconto INSS − desconto IR
+
+
+Regras adicionais:
+
+    Salários iguais ou inferiores a zero devem gerar erro ou exceção;
+    O resultado deve ser arredondado para duas casas decimais.
+    Não utilizar banco de dados, interfaces gráficas, APIs externas ou frameworks complexos;
+    Foco em testes automatizados, qualidade interna e métricas.

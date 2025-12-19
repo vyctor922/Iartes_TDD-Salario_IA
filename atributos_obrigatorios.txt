@@ -1,0 +1,29 @@
+ATRIBUTOS DE QUALIDADE
+● Confiabilidade: Focada na garantia de que as regras de negócio sejam
+atendidas sem falhas, ou seja. No ciclo Red-Green, a cobertura de testes
+valida se o código funciona conforme o esperado antes de avançar, reduzindo
+erros em produção.
+● Manutenibilidade: Para atuar como um freio para a IA. Se a IA sugerir uma
+solução excessivamente complexa para um cálculo, os desenvolvedores
+intervirão na fase de refatoração objetivando a simplificação do design
+proposto, tornando o código mais fácil de entender e modificar no futuro.
+● Testabilidade: Ideal para que as ferramentas de apoio baseadas em IA
+trabalhem, pois métodos pequenos e bem definidos geram sugestões de
+código muito mais precisas dado o escopo reduzido em seu menor grão.
+● Escalabilidade: Para garantir a capacidade de lidar com aumento de carga
+de usuários ou dados sem perda de desempenho, caso necessário.
+MÉTRICAS DE SOFTWARE
+● Complexidade Ciclomática: Atuará como um "freio" para a IA, evitando que
+ela sugira soluções excessivamente complexas para cálculos simples. Valores
+altos indicam designs difíceis de manter e testar.
+● Cobertura de Código: Utilizada como uma "métrica de calor" para evitar
+alucinações da IA. Garante que cada regra de negócio (como a isenção de
+IRRF até R$ 2.000,00) possua um teste correspondente.
+● Tempo de Execução: Métrica direta para confirmar se a solução proposta
+pela IA é performática, especialmente em funções de processamento de
+cálculos.
+● Blocos de Comentário por Classe/Função: Adotada como uma métrica de
+legibilidade para encorajar a IA a gerar código auto documentado ou incluir
+explicações concisas sobre a lógica tributária aplicada.
+● Lines of Code (LOC): Avaliação simples da extensão do código para
+correlação com a complexidade e o tamanho do projeto.
