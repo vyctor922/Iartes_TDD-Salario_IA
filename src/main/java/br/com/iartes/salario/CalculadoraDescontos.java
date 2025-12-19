@@ -22,20 +22,20 @@ public class CalculadoraDescontos {
 
     public double calcularIRRF(double salarioBruto, int numeroDependentes) {
         ValidadorEntrada.validarSalarioPositivo(salarioBruto);
-        if (numeroDependentes < 0) {
-            throw new IllegalArgumentException("Número de dependentes deve ser >= 0");
-        }
-        double aliquotaBase;
-        if (salarioBruto <= RegrasTributarias.LIMITE_ISENCAO_IRRF) {
-            aliquotaBase = 0.00;
-        } else if (salarioBruto < RegrasTributarias.LIMITE_PROGRESSAO_IRRF_SUPERIOR) {
-            aliquotaBase = RegrasTributarias.ALIQUOTA_IRRF;
-        } else {
-            aliquotaBase = RegrasTributarias.ALIQUOTA_IRRF_FAIXA_SUPERIOR;
-        }
-        double irBase = aliquotaBase * salarioBruto;
+        ValidadorEntrada.validarDependentesNaoNegativos(numeroDependentes);
+        double irBase = aliquotaIRRFV2(salarioBruto) * salarioBruto;
         double deducao = numeroDependentes * RegrasTributarias.DEDUCAO_POR_DEPENDENTE;
         double irFinal = Math.max(0.00, irBase - deducao);
         return Arredondador.duasCasas(irFinal);
+    }
+
+    private double aliquotaIRRFV2(double salarioBruto) {
+        if (salarioBruto <= RegrasTributarias.LIMITE_ISENCAO_IRRF) {
+            return 0.00;
+        }
+        if (salarioBruto < RegrasTributarias.LIMITE_PROGRESSAO_IRRF_SUPERIOR) {
+            return RegrasTributarias.ALIQUOTA_IRRF;
+        }
+        return RegrasTributarias.ALIQUOTA_IRRF_FAIXA_SUPERIOR;
     }
 }

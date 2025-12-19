@@ -8,5 +8,10 @@ public final class ValidadorEntrada {
             throw new IllegalArgumentException("Salário bruto deve ser positivo");
         }
     }
-}
 
+    public static void validarDependentesNaoNegativos(int numeroDependentes) {
+        if (numeroDependentes < 0) {
+            throw new IllegalArgumentException("Número de dependentes deve ser >= 0");
+        }
+    }
+}

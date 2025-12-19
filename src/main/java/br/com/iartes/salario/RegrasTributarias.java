@@ -8,6 +8,7 @@ public final class RegrasTributarias {
     public static final double ALIQUOTA_IRRF_FAIXA_SUPERIOR = 0.20;
     public static final double LIMITE_PROGRESSAO_IRRF_SUPERIOR = 5000.00;
     public static final double DEDUCAO_POR_DEPENDENTE = 150.00;
+    public static final double ALIQUOTA_VALE_TRANSPORTE = 0.06;
 
     private RegrasTributarias() {}
 }

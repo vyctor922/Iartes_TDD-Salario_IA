@@ -25,9 +25,7 @@ public class CalculadoraSalarioLiquido {
 
     public double calcular(double salarioBruto, int numeroDependentes, boolean optanteValeTransporte) {
         ValidadorEntrada.validarSalarioPositivo(salarioBruto);
-        if (numeroDependentes < 0) {
-            throw new IllegalArgumentException("Número de dependentes deve ser >= 0");
-        }
+        ValidadorEntrada.validarDependentesNaoNegativos(numeroDependentes);
         double inss = calculadoraDescontos.calcularINSS(salarioBruto);
         double irrf;
         if (numeroDependentes == 0 && !optanteValeTransporte) {
@@ -35,7 +33,7 @@ public class CalculadoraSalarioLiquido {
         } else {
             irrf = calculadoraDescontos.calcularIRRF(salarioBruto, numeroDependentes);
         }
-        double vt = optanteValeTransporte ? Arredondador.duasCasas(0.06 * salarioBruto) : 0.00;
+        double vt = optanteValeTransporte ? Arredondador.duasCasas(RegrasTributarias.ALIQUOTA_VALE_TRANSPORTE * salarioBruto) : 0.00;
         double liquido = salarioBruto - inss - irrf - vt;
         return Arredondador.duasCasas(liquido);
     }
