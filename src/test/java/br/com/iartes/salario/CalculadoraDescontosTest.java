@@ -49,10 +49,10 @@ class CalculadoraDescontosTest {
                     "Implemente o cálculo de INSS: 8% com teto de R$ 500,00.");
         }
         try {
-            metodoIRRF = clazz.getDeclaredMethod("calcularIRRF", double.class);
+            metodoIRRF = clazz.getDeclaredMethod("calcularIRRF", double.class, int.class);
         } catch (NoSuchMethodException e) {
-            fail("Método esperado não encontrado: calcularIRRF(double). " +
-                    "Implemente a regra: isento até R$ 2.000,00; 10% acima disso.");
+            fail("Método esperado não encontrado: calcularIRRF(double, int). " +
+                    "Implemente V2 com faixas progressivas e dedução por dependentes.");
         }
     }
 
@@ -60,11 +60,11 @@ class CalculadoraDescontosTest {
         return Math.round(value * 100.0) / 100.0;
     }
 
-    private double invokeDouble(Method m, double salario) {
+    private double invokeDouble(Method m, Object... args) {
         try {
             Object instance = clazz.getDeclaredConstructor().newInstance();
-            Object result = m.invoke(instance, salario);
-            assertNotNull(result, "Resultado não deve ser nulo para salário " + salario);
+            Object result = m.invoke(instance, args);
+            assertNotNull(result, "Resultado não deve ser nulo");
             assertTrue(result instanceof Double,
                     "O tipo de retorno deve ser double. Obtido: " + result.getClass().getName());
             return (double) result;
@@ -120,13 +120,13 @@ class CalculadoraDescontosTest {
             // Domínio não define dependentes; validamos regra básica do contexto.
             double salarioIsento = 2000.00;
             double esperadoIsento = 0.00;
-            double obtidoIsento = round2(invokeDouble(metodoIRRF, salarioIsento));
+            double obtidoIsento = round2(invokeDouble(metodoIRRF, salarioIsento, 0));
             assertEquals(esperadoIsento, obtidoIsento,
                     "IRRF para salário " + salarioIsento + " deve ser isento (" + esperadoIsento + ") mas foi " + obtidoIsento);
 
             double salarioTributavel = 2000.01;
             double esperadoTributavel = round2(0.10 * salarioTributavel);
-            double obtidoTributavel = round2(invokeDouble(metodoIRRF, salarioTributavel));
+            double obtidoTributavel = round2(invokeDouble(metodoIRRF, salarioTributavel, 0));
             assertEquals(esperadoTributavel, obtidoTributavel,
                     "IRRF 10% para salário " + salarioTributavel + " deve ser " + esperadoTributavel + " mas foi " + obtidoTributavel);
         }
@@ -156,7 +156,7 @@ class CalculadoraDescontosTest {
                         "Deve lançar IllegalArgumentException para INSS com salário negativo");
                 assertThrows(IllegalArgumentException.class, () -> {
                             try {
-                                metodoIRRF.invoke(instance, salarioNegativo);
+                                metodoIRRF.invoke(instance, salarioNegativo, 0);
                             } catch (InvocationTargetException e) {
                                 Throwable cause = e.getCause();
                                 if (cause instanceof RuntimeException re) throw re;
@@ -182,9 +182,84 @@ class CalculadoraDescontosTest {
 
             double salarioAlto = 9876.543;
             double esperadoIR = round2(0.10 * salarioAlto);
-            double obtidoIR = round2(invokeDouble(metodoIRRF, salarioAlto));
+            double obtidoIR = round2(invokeDouble(metodoIRRF, salarioAlto, 0));
             assertEquals(esperadoIR, obtidoIR,
                     "IRRF deve ser arredondado para duas casas. Esperado " + esperadoIR + " obtido " + obtidoIR);
+        }
+    }
+
+    @Nested
+    class IRProgressivoV2 {
+        @Test
+        @DisplayName("deve_aplicar_aliquota_10_porcento_para_bruto_3000_sem_dependentes")
+        void Deve_aplicar_aliquota_10_porcento_para_bruto_3000_sem_dependentes() {
+            double bruto = 3000.00;
+            int dependentes = 0;
+            double esperado = round2(0.10 * bruto);
+            double obtido = round2(invokeDouble(metodoIRRF, bruto, dependentes));
+            assertEquals(esperado, obtido,
+                    "Para bruto " + bruto + " com " + dependentes + " dependentes, IR esperado 10% (" + esperado + ") mas foi " + obtido);
+        }
+
+        @Test
+        @DisplayName("deve_aplicar_aliquota_20_porcento_para_bruto_5000_sem_dependentes")
+        void Deve_aplicar_aliquota_20_porcento_para_bruto_5000_sem_dependentes() {
+            double bruto = 5000.00;
+            int dependentes = 0;
+            double esperado = round2(0.20 * bruto);
+            double obtido = round2(invokeDouble(metodoIRRF, bruto, dependentes));
+            assertEquals(esperado, obtido,
+                    "Para bruto " + bruto + " com " + dependentes + " dependentes, IR esperado 20% (" + esperado + ") mas foi " + obtido);
+        }
+    }
+
+    @Nested
+    class DependentesV2 {
+        private static final double DEDUCAO_POR_DEPENDENTE = 150.00;
+
+        @Test
+        @DisplayName("deve_reduzir_IR_com_dependentes_sem_tornar_negativo")
+        void Deve_reduzir_IR_com_dependentes_sem_tornar_negativo() {
+            double bruto = 3000.00; // 10% base
+            int dependentes = 1;
+            double irBase = round2(0.10 * bruto);
+            double esperado = round2(Math.max(0.00, irBase - DEDUCAO_POR_DEPENDENTE));
+            double obtido = round2(invokeDouble(metodoIRRF, bruto, dependentes));
+            assertEquals(esperado, obtido,
+                    "IR com dependentes deve reduzir. Esperado " + esperado + " obtido " + obtido);
+        }
+
+        @Test
+        @DisplayName("deve_limitar_IR_a_zero_quando_deducao_superar_IR")
+        void Deve_limitar_IR_a_zero_quando_deducao_superar_IR() {
+            double bruto = 3000.00; // 10% base = 300
+            int dependentes = 3;    // 3 * 150 = 450 > 300
+            double esperado = 0.00;
+            double obtido = round2(invokeDouble(metodoIRRF, bruto, dependentes));
+            assertEquals(esperado, obtido,
+                    "IR não deve ficar negativo quando dedução por dependentes superar IR devido.");
+        }
+
+        @Test
+        @DisplayName("deve_lancar_excecao_para_dependentes_negativos")
+        void Deve_lancar_excecao_para_dependentes_negativos() {
+            double bruto = 3000.00;
+            int dependentes = -1;
+            try {
+                Object instance = clazz.getDeclaredConstructor().newInstance();
+                assertThrows(IllegalArgumentException.class, () -> {
+                            try {
+                                metodoIRRF.invoke(instance, bruto, dependentes);
+                            } catch (InvocationTargetException e) {
+                                Throwable cause = e.getCause();
+                                if (cause instanceof RuntimeException re) throw re;
+                                throw new RuntimeException(cause);
+                            }
+                        },
+                        "Deve lançar IllegalArgumentException para número de dependentes negativo");
+            } catch (ReflectiveOperationException e) {
+                fail("Falha de reflexão ao preparar instância: " + e.getMessage());
+            }
         }
     }
 }
