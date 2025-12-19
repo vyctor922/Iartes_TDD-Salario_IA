@@ -160,4 +160,18 @@ class CalculadoraSalarioLiquidoTest {
             }
         }
     }
+
+    @Nested
+    class Arredondamento {
+
+        @Test
+        @DisplayName("deve_arredondar_liquido_para_duas_casas")
+        void Deve_arredondar_liquido_para_duas_casas() {
+            double salario = 1234.567;
+            double esperado = round2(salario - inss(salario) - irrf(salario));
+            double obtido = round2(invokeCalcular(salario));
+            assertEquals(esperado, obtido,
+                    "Salário líquido deve ser arredondado para duas casas. Esperado " + esperado + " obtido " + obtido);
+        }
+    }
 }

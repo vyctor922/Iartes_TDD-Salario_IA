@@ -169,4 +169,22 @@ class CalculadoraDescontosTest {
             }
         }
     }
+    @Nested
+    class Arredondamento {
+        @Test
+        @DisplayName("deve_arredondar_resultados_para_duas_casas")
+        void Deve_arredondar_resultados_para_duas_casas() {
+            double salario = 1234.567;
+            double esperadoINSS = round2(Math.min(0.08 * salario, 500.00));
+            double obtidoINSS = round2(invokeDouble(metodoINSS, salario));
+            assertEquals(esperadoINSS, obtidoINSS,
+                    "INSS deve ser arredondado para duas casas. Esperado " + esperadoINSS + " obtido " + obtidoINSS);
+
+            double salarioAlto = 9876.543;
+            double esperadoIR = round2(0.10 * salarioAlto);
+            double obtidoIR = round2(invokeDouble(metodoIRRF, salarioAlto));
+            assertEquals(esperadoIR, obtidoIR,
+                    "IRRF deve ser arredondado para duas casas. Esperado " + esperadoIR + " obtido " + obtidoIR);
+        }
+    }
 }
