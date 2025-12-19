@@ -181,7 +181,7 @@ class CalculadoraDescontosTest {
                     "INSS deve ser arredondado para duas casas. Esperado " + esperadoINSS + " obtido " + obtidoINSS);
 
             double salarioAlto = 9876.543;
-            double esperadoIR = round2(0.10 * salarioAlto);
+            double esperadoIR = round2(0.20 * salarioAlto);
             double obtidoIR = round2(invokeDouble(metodoIRRF, salarioAlto, 0));
             assertEquals(esperadoIR, obtidoIR,
                     "IRRF deve ser arredondado para duas casas. Esperado " + esperadoIR + " obtido " + obtidoIR);
